@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MindAR WebAR</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #status-bar {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.75);
+        color: #ffffff;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        z-index: 9999;
+        text-align: center;
+        max-width: 85%;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status-bar">กำลังโหลดระบบ AR และไฟล์ target.mind...</div>
+
+    <a-scene
+      mindar-image="imageTargetSrc: ./target.mind; autoStart: true; uiLoading: yes; uiScanning: yes; uiError: yes;"
+      color-space="sRGB"
+      renderer="colorManagement: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <!-- หากต้องการซ้อนทับด้วยรูปภาพ ให้เอาคอมเมนต์ออก และอัปโหลด overlay.png ไว้ระดับเดียวกับ index.html -->
+        <!-- <img id="overlay-img" src="./overlay.png" crossorigin="anonymous" /> -->
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- จุดอ้างอิงรูป Target (targetIndex: 0 คือรูปแรกในไฟล์ target.mind) -->
+      <a-entity id="target-entity" mindar-image-target="targetIndex: 0">
+        
+        <!-- แผ่นสีซ้อนทับลงบนรูป Target -->
+        <a-plane
+          color="#00D1B2"
+          opacity="0.75"
+          position="0 0 0"
+          height="1"
+          width="1"
+        ></a-plane>
+
+        <!-- กล่อง 3D หมุนลอยเหนือรูป Target เพื่อทดสอบการตรวจจับ -->
+        <a-box
+          position="0 0 0.25"
+          scale="0.35 0.35 0.35"
+          color="#FF3860"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"
+        ></a-box>
+
+        <!-- ตัวอย่างการซ้อนทับด้วยรูปภาพ (เอาคอมเมนต์ออกเมื่อเปิดใช้ใน <a-assets>) -->
+        <!-- <a-plane src="#overlay-img" position="0 0 0.01" height="1" width="1"></a-plane> -->
+
+      </a-entity>
+    </a-scene>
+
+    <script>
+      const sceneEl = document.querySelector("a-scene");
+      const targetEntity = document.querySelector("#target-entity");
+      const statusBar = document.querySelector("#status-bar");
+
+      // ตรวจสอบทันทีว่าบน GitHub Pages เจอไฟล์ target.mind หรือไม่
+      fetch("./target.mind", { method: "HEAD" })
+        .then((res) => {
+          if (!res.ok) {
+            statusBar.style.background = "rgba(220, 38, 38, 0.9)";
+            statusBar.innerText = "ไม่พบไฟล์ target.mind (Error " + res.status + ") กรุณาเช็กชื่อไฟล์บน GitHub";
+          }
+        })
+        .catch(() => {
+          statusBar.style.background = "rgba(220, 38, 38, 0.9)";
+          statusBar.innerText = "ไม่สามารถเข้าถึงไฟล์ target.mind ได้";
+        });
+
+      // เมื่อ MindAR อ่านไฟล์ target.mind และเปิดกล้องสำเร็จ
+      sceneEl.addEventListener("arReady", () => {
+        statusBar.style.background = "rgba(0, 0, 0, 0.75)";
+        statusBar.innerText = "พร้อมใช้งาน! ส่องกล้องไปที่รูป Target";
+      });
+
+      // เมื่อไฟล์ target.mind มีปัญหาหรืออ่านไม่ได้
+      sceneEl.addEventListener("arError", () => {
+        statusBar.style.background = "rgba(220, 38, 38, 0.9)";
+        statusBar.innerText = "อ่านไฟล์ target.mind ไม่สำเร็จ ไฟล์อาจเสียหาย";
+      });
+
+      // เมื่อกล้องส่องเจอรูประบุใน target.mind
+      targetEntity.addEventListener("targetFound", () => {
+        statusBar.style.background = "rgba(16, 185, 129, 0.9)";
+        statusBar.innerText = "ตรวจพบรูป Target แล้ว!";
+      });
+
+      // เมื่อกล้องเลื่อนหลุดออกจากรูป
+      targetEntity.addEventListener("targetLost", () => {
+        statusBar.style.background = "rgba(0, 0, 0, 0.75)";
+        statusBar.innerText = "ส่องกล้องไปที่รูป Target";
+      });
+    </script>
+  </body>
+</html>
