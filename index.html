@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MindAR Image Overlay</title>
+    <!-- โหลดไลบรารี A-Frame และ MindAR -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <!-- เรียกใช้งานไฟล์ target.mind -->
+    <a-scene
+      mindar-image="imageTargetSrc: ./target.mind;"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <!-- หากต้องการซ้อนทับด้วยรูปภาพ หรือโมเดล 3D ให้ประกาศไฟล์ตรงนี้ -->
+        <!-- <img id="overlay-image" src="./overlay.png" /> -->
+        <!-- <a-asset-item id="model-3d" src="./model.glb"></a-asset-item> -->
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- จุดอ้างอิงรูป Target (targetIndex: 0 คือรูปแรกในไฟล์ target.mind) -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        
+        <!-- ตัวอย่างที่ 1: แสดงแผ่นป้ายสีทับลงบนรูป Target (ทดสอบได้ทันทีโดยไม่ต้องใช้ไฟล์เสริม) -->
+        <a-plane
+          color="#00D1B2"
+          opacity="0.8"
+          position="0 0 0"
+          height="1"
+          width="1"
+          rotation="0 0 0"
+        ></a-plane>
+
+        <!-- ตัวอย่างที่ 2: แสดงกล่อง 3D ลอยอยู่เหนือรูป Target -->
+        <a-box
+          position="0 0 0.25"
+          scale="0.4 0.4 0.4"
+          color="#FF3860"
+        ></a-box>
+
+        <!-- ตัวอย่างที่ 3: หากต้องการซ้อนทับด้วยรูปภาพ (เอาคอมเมนต์ออกและเปิดใช้ใน <a-assets>) -->
+        <!-- <a-plane src="#overlay-image" position="0 0 0.01" height="1" width="1"></a-plane> -->
+
+        <!-- ตัวอย่างที่ 4: หากต้องการซ้อนทับด้วยโมเดล 3D (.glb) -->
+        <!-- <a-gltf-model src="#model-3d" position="0 0 0" scale="0.5 0.5 0.5" rotation="90 0 0"></a-gltf-model> -->
+
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
